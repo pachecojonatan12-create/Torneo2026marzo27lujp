@@ -3,21 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torneo de Gallos - Impresión Profesional</title>
+    <title>Torneo de Gallos - Acceso Directo</title>
     <style>
         :root { --primary: #d32f2f; --dark: #1a1a1a; --light: #f4f4f4; --success: #2e7d32; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 15px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* Estilos de Pantalla */
         @media screen {
             h1, h2 { color: var(--dark); text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-            #login-overlay {
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: var(--dark); display: flex; flex-direction: column;
-                justify-content: center; align-items: center; z-index: 1000; color: white;
-            }
-            .login-box { background: #333; padding: 30px; border-radius: 10px; width: 80%; max-width: 300px; text-align: center; }
             .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
             .input-group { display: flex; flex-direction: column; }
             label { font-weight: bold; font-size: 0.85em; margin-bottom: 5px; color: #555; }
@@ -35,34 +28,22 @@
             .match-card { background: #e8f5e9; border-left: 5px solid var(--success); margin: 10px 0; padding: 15px; border-radius: 5px; }
             .match-info { display: flex; justify-content: space-between; align-items: center; }
             .vs { font-weight: bold; color: var(--primary); font-size: 1.2em; }
-            .hidden { display: none; }
         }
 
-        /* ESTILOS DE IMPRESIÓN */
         @media print {
-            .btn-group, .form-grid, h2, #login-overlay, .btn-delete, #seccion-registro { display: none !important; }
+            .btn-group, .form-grid, h2, .btn-delete, #seccion-registro, .no-print { display: none !important; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; max-width: 100%; border: none; }
             .print-only { display: block !important; }
             .match-card { border: 1px solid #000; background: white !important; page-break-inside: avoid; margin-bottom: 10px; }
             .vs { color: black !important; }
-            table { font-size: 12px; }
         }
         .print-only { display: none; }
     </style>
 </head>
 <body>
 
-<div id="login-overlay">
-    <div class="login-box">
-        <h2>🔒 Acceso</h2>
-        <input type="password" id="pass-input" placeholder="Contraseña">
-        <button onclick="checkPassword()" style="width: 100%; margin-top: 10px; background: var(--primary);">Entrar</button>
-        <p id="error-msg" style="color: #ff5252;"></p>
-    </div>
-</div>
-
-<div id="app-content" class="container hidden">
+<div class="container">
     <div class="print-only" style="text-align: center;">
         <h1>ACTA OFICIAL DE ENFRENTAMIENTOS</h1>
         <p>Fecha: <span id="print-date"></span></p>
@@ -105,18 +86,9 @@
 </div>
 
 <script>
-    const CLAVE_ACCESO = "0102";
-    let gallos = JSON.parse(localStorage.getItem('gallos_v4')) || [];
+    let gallos = JSON.parse(localStorage.getItem('gallos_v5')) || [];
 
-    function checkPassword() {
-        if(document.getElementById('pass-input').value === CLAVE_ACCESO) {
-            document.getElementById('login-overlay').classList.add('hidden');
-            document.getElementById('app-content').classList.remove('hidden');
-            actualizarInterfaz();
-        } else {
-            document.getElementById('error-msg').innerText = "Incorrecto";
-        }
-    }
+    window.onload = actualizarInterfaz;
 
     function agregarGallo() {
         const cuerda = document.getElementById('cuerda').value;
@@ -135,8 +107,10 @@
             totalOnzas: (lbs * 16) + oz
         });
 
-        localStorage.setItem('gallos_v4', JSON.stringify(gallos));
+        localStorage.setItem('gallos_v5', JSON.stringify(gallos));
         actualizarInterfaz();
+        
+        // Limpiar solo placa, peso y marca para agilizar el registro de la misma cuerda
         document.getElementById('placa').value = "";
         document.getElementById('lbs').value = "";
         document.getElementById('oz').value = "";
@@ -171,6 +145,7 @@
                 const diffPeso = Math.abs(lista[i].totalOnzas - lista[j].totalOnzas);
                 const diffMarca = Math.abs(lista[i].marca - lista[j].marca);
 
+                // REGLAS: Diferencia Peso <= 2 oz | Diferencia Marca <= 5 meses | Diferente Cuerda
                 if (diffPeso <= 2 && diffMarca <= 5 && lista[i].cuerda !== lista[j].cuerda) {
                     emparejados.add(lista[i].id);
                     emparejados.add(lista[j].id);
@@ -189,11 +164,12 @@
                 }
             }
         }
+        if(emparejados.size === 0) contenedor.innerHTML = "<p style='text-align:center'>No se hallaron parejas con los criterios actuales.</p>";
     }
 
     function imprimirCotejos() {
-        if (document.getElementById('lista-cotejos').innerHTML === "") {
-            alert("Primero presiona el botón 'Cotejar' para generar las peleas.");
+        if (document.getElementById('lista-cotejos').innerHTML === "" || document.getElementById('lista-cotejos').innerText.includes("No se hallaron")) {
+            alert("Primero genera los cotejos antes de imprimir.");
             return;
         }
         document.getElementById('print-date').innerText = new Date().toLocaleDateString();
@@ -202,14 +178,14 @@
 
     function eliminar(id) {
         gallos = gallos.filter(g => g.id !== id);
-        localStorage.setItem('gallos_v4', JSON.stringify(gallos));
+        localStorage.setItem('gallos_v5', JSON.stringify(gallos));
         actualizarInterfaz();
     }
 
     function limpiarTodo() {
-        if(confirm("¿Borrar todos los datos?")) {
+        if(confirm("¿Estás seguro de borrar todos los datos del evento?")) {
             gallos = [];
-            localStorage.removeItem('gallos_v4');
+            localStorage.removeItem('gallos_v5');
             location.reload();
         }
     }
