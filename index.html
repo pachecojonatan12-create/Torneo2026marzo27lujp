@@ -3,189 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torneo de Gallos - Acceso Directo</title>
+    <title>Sistema de Gallos Pro 2026 - Control Total</title>
     <style>
-        :root { --primary: #d32f2f; --dark: #1a1a1a; --light: #f4f4f4; --success: #2e7d32; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 15px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        :root { --primary: #0f172a; --secondary: #e11d48; --accent: #10b981; --bg: #f8fafc; --card: #ffffff; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: var(--card); padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; margin-bottom: 25px; padding-bottom: 10px; }
         
-        @media screen {
-            h1, h2 { color: var(--dark); text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-            .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
-            .input-group { display: flex; flex-direction: column; }
-            label { font-weight: bold; font-size: 0.85em; margin-bottom: 5px; color: #555; }
-            input { padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 1em; }
-            .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-            button { flex: 1; min-width: 120px; padding: 12px; border-radius: 6px; border: none; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-            .btn-add { background: var(--primary); }
-            .btn-match { background: var(--success); }
-            .btn-print { background: #0277bd; }
-            .btn-clear { background: #555; }
-            button:hover { opacity: 0.8; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-            th { background: #eee; }
-            .match-card { background: #e8f5e9; border-left: 5px solid var(--success); margin: 10px 0; padding: 15px; border-radius: 5px; }
-            .match-info { display: flex; justify-content: space-between; align-items: center; }
-            .vs { font-weight: bold; color: var(--primary); font-size: 1.2em; }
-        }
+        /* Panel de Registro */
+        .panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; }
+        input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; width: 100%; box-sizing: border-box; }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-add { background: var(--accent); color: white; }
+        .btn-match { background: var(--primary); color: white; width: 100%; margin: 20px 0; font-size: 1rem; }
+        .btn-reset { background: var(--secondary); color: white; font-size: 0.8rem; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85rem; }
+        th { background: #f8fafc; color: #64748b; text-align: left; padding: 12px; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        
+        /* TARJETAS DE PELEA OPTIMIZADAS */
+        .match-card { border: 2px solid #0f172a; border-radius: 12px; margin-bottom: 25px; overflow: hidden; background: white; page-break-inside: avoid; }
+        .match-header { background: #0f172a; color: white; padding: 8px 15px; font-size: 0.85rem; display: flex; justify-content: space-between; font-weight: bold; }
+        .match-info { display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; padding: 15px; gap: 10px; background: #fff; }
+        .vs { font-weight: 900; color: var(--secondary); font-size: 1.2rem; text-align: center; }
+        
+        .gallo-box { padding: 8px; border-radius: 8px; background: #fdfdfd; }
+        .gallo-box b { font-size: 1.1rem; color: #0f172a; display: block; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+        
+        /* Rejilla de información técnica */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .info-item { background: #f1f5f9; padding: 4px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; color: #334155; border: 1px solid #e2e8f0; }
+        .info-item span { color: #64748b; font-weight: 400; display: block; font-size: 0.65rem; text-transform: uppercase; }
 
-        @media print {
-            .btn-group, .form-grid, h2, .btn-delete, #seccion-registro, .no-print { display: none !important; }
+        .result-zone { background: #f8fafc; padding: 12px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; border-top: 1px solid #e2e8f0; }
+        .time-group { display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 0.9rem; }
+        .time-group input { width: 55px; padding: 5px; text-align: center; }
+
+        .leader-row { background: #f0fdf4 !important; font-weight: bold; }
+
+        @media print { 
+            .no-print { display: none !important; } 
+            .container { box-shadow: none; border: none; width: 100%; padding: 0; }
             body { background: white; padding: 0; }
-            .container { box-shadow: none; max-width: 100%; border: none; }
-            .print-only { display: block !important; }
-            .match-card { border: 1px solid #000; background: white !important; page-break-inside: avoid; margin-bottom: 10px; }
-            .vs { color: black !important; }
+            .match-card { border: 1px solid #000; margin-bottom: 15px; }
         }
-        .print-only { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="print-only" style="text-align: center;">
-        <h1>ACTA OFICIAL DE ENFRENTAMIENTOS</h1>
-        <p>Fecha: <span id="print-date"></span></p>
-        <hr>
+    <div class="header-top">
+        <h1>🏆 GALLOS PRO <span style="font-weight: 300;">v2026</span></h1>
+        <button class="btn btn-reset no-print" onclick="resetearSistema()">🧹 LIMPIAR TODO EL SISTEMA</button>
     </div>
 
-    <h1>Gestión de Torneo</h1>
-    
-    <div id="seccion-registro">
-        <div class="form-grid">
-            <div class="input-group"><label>Cuerda</label><input type="text" id="cuerda" placeholder="Nombre"></div>
-            <div class="input-group"><label>Placa</label><input type="text" id="placa" placeholder="A-01"></div>
-            <div class="input-group"><label>Libras</label><input type="number" id="lbs" placeholder="3"></div>
-            <div class="input-group"><label>Onzas</label><input type="number" id="oz" placeholder="2"></div>
-            <div class="input-group"><label>Marca (Meses)</label><input type="number" id="marca" placeholder="18"></div>
-        </div>
+    <div class="panel no-print">
+        <input type="text" id="cuerda" placeholder="Cuerda">
+        <input type="number" id="frente" placeholder="Frente #" value="1">
+        <input type="text" id="placa" placeholder="Placa">
+        <input type="text" id="anillo" placeholder="Anillo">
+        <input type="number" id="peso" placeholder="Peso" step="0.01">
+        <select id="marca">
+            <option value="">Mes Nac.</option>
+            <option value="Ene">Ene</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
+            <option value="Abr">Abr</option><option value="May">May</option><option value="Jun">Jun</option>
+            <option value="Jul">Jul</option><option value="Ago">Ago</option><option value="Sep">Sep</option>
+            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dic">Dic</option>
+        </select>
+        <button class="btn btn-add" onclick="registrarGallo()">➕ Registrar</button>
+    </div>
 
-        <div class="btn-group">
-            <button class="btn-add" onclick="agregarGallo()">Registrar</button>
-            <button class="btn-match" onclick="generarCotejos()">Cotejar</button>
-            <button class="btn-print" onclick="imprimirCotejos()">🖨️ Imprimir Acta</button>
-            <button class="btn-clear" onclick="limpiarTodo()">Borrar Todo</button>
-        </div>
+    <table id="tablaGallos" class="no-print">
+        <thead>
+            <tr><th>Cuerda</th><th>Fte</th><th>Placa</th><th>Anillo</th><th>Peso</th><th>Mes</th><th></th></tr>
+        </thead>
+        <tbody id="tbodyGallos"></tbody>
+    </table>
 
-        <table>
-            <thead><tr><th>Cuerda</th><th>Placa</th><th>Peso</th><th>Edad</th><th>X</th></tr></thead>
-            <tbody id="cuerpo-tabla"></tbody>
+    <button class="btn btn-match no-print" onclick="generarEnfrentamientos()">⚔️ CASAR PELEAS POR PESO</button>
+
+    <div id="resultadosCotejo"></div>
+
+    <div id="seccionEstadisticas" style="display:none; margin-top: 40px;">
+        <h2 style="text-align:center">📊 RANKING POR FRENTES</h2>
+        <table id="tablaEstadisticas">
+            <thead>
+                <tr><th>Cuerda - Frente</th><th>Inscritos</th><th>G</th><th>P</th><th>T</th><th>Puntos</th><th>Tiempo Total</th></tr>
+            </thead>
+            <tbody></tbody>
         </table>
-    </div>
-
-    <div id="seccion-cotejos">
-        <h2 class="no-print">Enfrentamientos Pactados</h2>
-        <div id="lista-cotejos"></div>
-    </div>
-    
-    <div class="print-only" style="margin-top: 50px; display: flex; justify-content: space-around;">
-        <div style="border-top: 1px solid black; width: 200px; text-align: center;">Firma Organizador</div>
-        <div style="border-top: 1px solid black; width: 200px; text-align: center;">Firma Juez</div>
+        <div class="no-print" style="margin-top: 20px; display: flex; gap: 10px;">
+            <button class="btn btn-match" style="background:var(--accent)" onclick="actualizarEstadisticas()">🔄 Actualizar Tabla</button>
+            <button class="btn btn-match" style="background: #334155" onclick="window.print()">🖨️ Imprimir Todo</button>
+        </div>
     </div>
 </div>
 
 <script>
-    let gallos = JSON.parse(localStorage.getItem('gallos_v5')) || [];
+    let gallos = JSON.parse(localStorage.getItem('gallos')) || [];
+    let peleasCasadas = JSON.parse(localStorage.getItem('peleas')) || [];
 
-    window.onload = actualizarInterfaz;
+    window.onload = () => {
+        actualizarTabla();
+        if(peleasCasadas.length > 0) {
+            renderizarTodasPeleas();
+            actualizarEstadisticas();
+            document.getElementById('seccionEstadisticas').style.display = 'block';
+        }
+    };
 
-    function agregarGallo() {
-        const cuerda = document.getElementById('cuerda').value;
-        const placa = document.getElementById('placa').value;
-        const lbs = parseInt(document.getElementById('lbs').value) || 0;
-        const oz = parseInt(document.getElementById('oz').value) || 0;
-        const marca = parseInt(document.getElementById('marca').value) || 0;
+    function registrarGallo() {
+        const cuerda = document.getElementById('cuerda').value.toUpperCase().trim();
+        const frente = document.getElementById('frente').value;
+        const peso = parseFloat(document.getElementById('peso').value);
+        const placa = document.getElementById('placa').value || "S/P";
+        const anillo = document.getElementById('anillo').value || "S/A";
+        const marca = document.getElementById('marca').value || "N/A";
 
-        if(!cuerda || !placa) return alert("Faltan datos");
+        if(!cuerda || isNaN(peso)) return alert("Nombre de Cuerda y Peso son obligatorios.");
 
-        gallos.push({
-            id: Date.now(),
-            cuerda: cuerda.toUpperCase(),
-            placa: placa.toUpperCase(),
-            lbs, oz, marca,
-            totalOnzas: (lbs * 16) + oz
-        });
-
-        localStorage.setItem('gallos_v5', JSON.stringify(gallos));
-        actualizarInterfaz();
-        
-        // Limpiar solo placa, peso y marca para agilizar el registro de la misma cuerda
+        gallos.push({ id: Date.now(), cuerda, frente, placa, anillo, peso, marca });
+        localStorage.setItem('gallos', JSON.stringify(gallos));
+        actualizarTabla();
         document.getElementById('placa').value = "";
-        document.getElementById('lbs').value = "";
-        document.getElementById('oz').value = "";
+        document.getElementById('anillo').value = "";
+        document.getElementById('peso').value = "";
     }
 
-    function actualizarInterfaz() {
-        const tbody = document.getElementById('cuerpo-tabla');
-        tbody.innerHTML = "";
-        gallos.forEach(g => {
-            tbody.innerHTML += `<tr>
-                <td>${g.cuerda}</td>
-                <td>${g.placa}</td>
-                <td>${g.lbs}.${g.oz}</td>
-                <td>${g.marca}m</td>
-                <td><button onclick="eliminar(${g.id})" class="btn-delete" style="background:#555; padding:2px 8px; min-width:auto;">X</button></td>
-            </tr>`;
-        });
+    function actualizarTabla() {
+        const tbody = document.getElementById("tbodyGallos");
+        tbody.innerHTML = gallos.map((g, i) => `
+            <tr><td><b>${g.cuerda}</b></td><td>F-${g.frente}</td><td>${g.placa}</td><td>${g.anillo}</td><td>${g.peso.toFixed(2)}</td><td>${g.marca}</td><td><button onclick="eliminarGallo(${i})" style="color:red; background:none; border:none; cursor:pointer;">✕</button></td></tr>
+        `).join('');
     }
 
-    function generarCotejos() {
-        const contenedor = document.getElementById('lista-cotejos');
-        contenedor.innerHTML = "";
-        let emparejados = new Set();
-        let lista = [...gallos].sort((a, b) => a.totalOnzas - b.totalOnzas);
-        let numPelea = 1;
+    function eliminarGallo(i) {
+        gallos.splice(i, 1);
+        localStorage.setItem('gallos', JSON.stringify(gallos));
+        actualizarTabla();
+    }
 
-        for (let i = 0; i < lista.length; i++) {
-            if (emparejados.has(lista[i].id)) continue;
-            for (let j = i + 1; j < lista.length; j++) {
-                if (emparejados.has(lista[j].id)) continue;
+    function generarEnfrentamientos() {
+        if(gallos.length < 2) return alert("No hay suficientes gallos para cotejar.");
+        let disponibles = [...gallos].sort((a, b) => a.peso - b.peso);
+        peleasCasadas = [];
+        let contador = 1;
+        const margenes = [0.02, 0.05, 0.10, 0.15, 0.20];
 
-                const diffPeso = Math.abs(lista[i].totalOnzas - lista[j].totalOnzas);
-                const diffMarca = Math.abs(lista[i].marca - lista[j].marca);
-
-                // REGLAS: Diferencia Peso <= 2 oz | Diferencia Marca <= 5 meses | Diferente Cuerda
-                if (diffPeso <= 2 && diffMarca <= 5 && lista[i].cuerda !== lista[j].cuerda) {
-                    emparejados.add(lista[i].id);
-                    emparejados.add(lista[j].id);
-
-                    contenedor.innerHTML += `
-                        <div class="match-card">
-                            <div style="text-align:center; font-weight:bold; border-bottom:1px solid #ddd; margin-bottom:10px;">PELEA N° ${numPelea++}</div>
-                            <div class="match-info">
-                                <div><strong>${lista[i].cuerda}</strong><br>Placa: ${lista[i].placa}<br>Peso: ${lista[i].lbs}.${lista[i].oz}</div>
-                                <div class="vs"> VS </div>
-                                <div style="text-align:right"><strong>${lista[j].cuerda}</strong><br>Placa: ${lista[j].placa}<br>Peso: ${lista[j].lbs}.${lista[j].oz}</div>
-                            </div>
-                            <div style="font-size:0.8em; text-align:center; margin-top:5px;">Diferencia: ${diffPeso} oz | Margen Marca: ${diffMarca} meses</div>
-                        </div>`;
-                    break;
+        margenes.forEach(margen => {
+            for (let i = 0; i < disponibles.length; i++) {
+                for (let j = i + 1; j < disponibles.length; j++) {
+                    if (disponibles[i].cuerda !== disponibles[j].cuerda && Math.abs(disponibles[i].peso - disponibles[j].peso) <= margen) {
+                        peleasCasadas.push({ id: contador++, g1: disponibles[i], g2: disponibles[j], ganador: '', min: 0, seg: 0 });
+                        disponibles.splice(j, 1); disponibles.splice(i, 1);
+                        i--; break;
+                    }
                 }
             }
-        }
-        if(emparejados.size === 0) contenedor.innerHTML = "<p style='text-align:center'>No se hallaron parejas con los criterios actuales.</p>";
+        });
+        localStorage.setItem('peleas', JSON.stringify(peleasCasadas));
+        renderizarTodasPeleas();
+        document.getElementById('seccionEstadisticas').style.display = 'block';
     }
 
-    function imprimirCotejos() {
-        if (document.getElementById('lista-cotejos').innerHTML === "" || document.getElementById('lista-cotejos').innerText.includes("No se hallaron")) {
-            alert("Primero genera los cotejos antes de imprimir.");
-            return;
-        }
-        document.getElementById('print-date').innerText = new Date().toLocaleDateString();
-        window.print();
+    function renderizarTodasPeleas() {
+        const cont = document.getElementById('resultadosCotejo');
+        cont.innerHTML = "<h2 style='text-align:center; margin: 30px 0;'>⚔️ PROGRAMACIÓN DE COMBATES</h2>";
+        peleasCasadas.forEach(p => {
+            cont.innerHTML += `
+                <div class="match-card">
+                    <div class="match-header">
+                        <span>COMBATE #${p.id}</span>
+                        <span>DIFERENCIA: ${Math.abs(p.g1.peso - p.g2.peso).toFixed(2)} LBS</span>
+                    </div>
+                    <div class="match-info">
+                        <div class="gallo-box" style="text-align:right">
+                            <b>${p.g1.cuerda} <small>(F-${p.g1.frente})</small></b>
+                            <div class="info-grid">
+                                <div class="info-item"><span>Peso</span>${p.g1.peso.toFixed(2)}</div>
+                                <div class="info-item"><span>Mes</span>${p.g1.marca}</div>
+                                <div class="info-item"><span>Placa</span>${p.g1.placa}</div>
+                                <div class="info-item"><span>Anillo</span>${p.g1.anillo}</div>
+                            </div>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="gallo-box" style="text-align:left">
+                            <b>${p.g2.cuerda} <small>(F-${p.g2.frente})</small></b>
+                            <div class="info-grid">
+                                <div class="info-item"><span>Peso</span>${p.g2.peso.toFixed(2)}</div>
+                                <div class="info-item"><span>Mes</span>${p.g2.marca}</div>
+                                <div class="info-item"><span>Placa</span>${p.g2.placa}</div>
+                                <div class="info-item"><span>Anillo</span>${p.g2.anillo}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-zone no-print">
+                        <div class="time-group">
+                            ⏱️ <input type="number" placeholder="Min" value="${p.min || ''}" onchange="guardarTiempo(${p.id}, 'min', this.value)">
+                            :
+                            <input type="number" placeholder="Seg" value="${p.seg || ''}" onchange="guardarTiempo(${p.id}, 'seg', this.value)">
+                        </div>
+                        <select onchange="guardarGanador(${p.id}, this.value)" style="width: 200px;">
+                            <option value="">Seleccionar Ganador...</option>
+                            <option value="g1" ${p.ganador==='g1'?'selected':''}>Gana ${p.g1.cuerda}</option>
+                            <option value="g2" ${p.ganador==='g2'?'selected':''}>Gana ${p.g2.cuerda}</option>
+                            <option value="T" ${p.ganador==='T'?'selected':''}>Tablas</option>
+                        </select>
+                    </div>
+                </div>`;
+        });
     }
 
-    function eliminar(id) {
-        gallos = gallos.filter(g => g.id !== id);
-        localStorage.setItem('gallos_v5', JSON.stringify(gallos));
-        actualizarInterfaz();
+    function guardarTiempo(id, tipo, valor) {
+        const p = peleasCasadas.find(x => x.id === id);
+        p[tipo] = parseInt(valor) || 0;
+        localStorage.setItem('peleas', JSON.stringify(peleasCasadas));
     }
 
-    function limpiarTodo() {
-        if(confirm("¿Estás seguro de borrar todos los datos del evento?")) {
-            gallos = [];
-            localStorage.removeItem('gallos_v5');
+    function guardarGanador(id, valor) {
+        const p = peleasCasadas.find(x => x.id === id);
+        p.ganador = valor;
+        localStorage.setItem('peleas', JSON.stringify(peleasCasadas));
+    }
+
+    function actualizarEstadisticas() {
+        const stats = {};
+        gallos.forEach(g => {
+            const key = `${g.cuerda} (F-${g.frente})`;
+            if(!stats[key]) stats[key] = { inscritos: 0, g: 0, p: 0, t: 0, puntos: 0, totalSeg: 0 };
+            stats[key].inscritos++;
+        });
+
+        peleasCasadas.forEach(p => {
+            if(!p.ganador) return;
+            const key1 = `${p.g1.cuerda} (F-${p.g1.frente})`;
+            const key2 = `${p.g2.cuerda} (F-${p.g2.frente})`;
+            const tPelea = (p.min * 60) + p.seg;
+            stats[key1].totalSeg += tPelea; stats[key2].totalSeg += tPelea;
+
+            if(p.ganador === 'g1') { stats[key1].g++; stats[key1].puntos += 3; stats[key2].p++; }
+            else if(p.ganador === 'g2') { stats[key2].g++; stats[key2].puntos += 3; stats[key1].p++; }
+            else { stats[key1].t++; stats[key1].puntos += 1; stats[key2].t++; stats[key2].puntos += 1; }
+        });
+
+        const tbody = document.querySelector("#tablaEstadisticas tbody");
+        tbody.innerHTML = Object.keys(stats)
+            .sort((a, b) => stats[b].puntos - stats[a].puntos || stats[a].totalSeg - stats[b].totalSeg)
+            .map((c, i) => {
+                const m = Math.floor(stats[c].totalSeg / 60);
+                const s = stats[c].totalSeg % 60;
+                return `<tr class="${i === 0 ? 'leader-row' : ''}">
+                    <td><b>${c}</b></td><td>${stats[c].inscritos}</td>
+                    <td style="color:green">${stats[c].g}</td><td style="color:red">${stats[c].p}</td><td>${stats[c].t}</td>
+                    <td><b>${stats[c].puntos} pts</b></td><td>${m}m ${s}s</td>
+                </tr>`;
+            }).join('');
+    }
+
+    function resetearSistema() {
+        if(confirm("⚠️ ATENCIÓN: Se borrarán todas las cuerdas, peleas y resultados. ¿Deseas continuar?")) {
+            localStorage.removeItem('gallos');
+            localStorage.removeItem('peleas');
             location.reload();
         }
     }
